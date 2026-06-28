@@ -95,7 +95,7 @@ export default function DrawModal({ onComplete, onCancel }) {
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
         {/* 헤더 */}
         <div style={headerStyle}>
-          <span style={titleStyle}>✏️ 펜으로 수식 그리기</span>
+          <span style={titleStyle}>✏️ 펜으로 수식 쓰기</span>
           <button onClick={onCancel} style={iconBtnStyle} title="닫기">
             <X size={18} />
           </button>

@@ -25,10 +25,13 @@ export default function AttachmentInput({ attachment, onChange }) {
     return () => URL.revokeObjectURL(url);
   }, [attachment]);
 
-  const handleFilePick = (e) => {
+  const handleFilePick = async (e) => {
     const file = e.target.files?.[0];
-    if (file) onChange(file);
     e.target.value = ""; // 같은 파일 다시 선택 가능하도록 초기화
+    if (!file) return;
+    // 카메라/갤러리 사진은 용량이 클 수 있어 업로드 전 축소·압축
+    const compressed = await compressImage(file);
+    onChange(compressed);
   };
 
   return (
@@ -44,7 +47,7 @@ export default function AttachmentInput({ attachment, onChange }) {
         </button>
         <button type="button" onClick={() => setShowDraw(true)} style={attachBtnStyle}>
           <PenLine size={15} style={{ marginRight: 6 }} />
-          펜으로 그리기
+          펜으로 쓰기
         </button>
         {/* 갤러리/파일 선택 */}
         <input
@@ -92,6 +95,48 @@ export default function AttachmentInput({ attachment, onChange }) {
       )}
     </div>
   );
+}
+
+// 카메라/갤러리 이미지를 최대 변(1600px) 기준으로 축소하고 JPEG로 재인코딩한다.
+// 업로드 실패(용량/시간초과)를 막고 속도를 높인다. 실패 시 원본을 그대로 반환.
+function compressImage(file) {
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.startsWith("image/")) {
+      resolve(file);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const maxDim = 1600;
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        if (width >= height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => resolve(blob || file),
+        "image/jpeg",
+        0.85
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file); // 디코딩 실패 시 원본 사용
+    };
+    img.src = url;
+  });
 }
 
 // --- 스타일 ---
