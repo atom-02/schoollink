@@ -39,9 +39,9 @@ const DEFAULT_QUESTIONS = [
     userId: "user_03",
     userName: "박동현 (질문 왕)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=user_03",
-    title: "고등 수학(상) 이차방정식 근과 계수의 관계 유도가 헷갈려요.",
-    content: "이차방정식 ax^2 + bx + c = 0 의 두 근이 알파, 베타일 때 알파+베타 = -b/a 가 되는 원리가 궁금합니다. 매번 외우기만 하니까 응용문제에서 자꾸 막히네요. 수학 고수분들의 쉬운 설명 부탁드려요!",
-    keywords: ["수학", "방정식"],
+    title: "기초수학 인수분해할 때 공통인수로 묶는 게 자꾸 헷갈려요.",
+    content: "예를 들어 6x^2 + 9x 를 인수분해하면 3x(2x + 3) 이 된다는데, 공통인수 3x를 어떻게 찾는 건지 원리가 궁금합니다. 숫자랑 문자를 따로따로 봐야 하나요? 쉬운 설명 부탁드려요!",
+    keywords: ["기초수학", "인수분해"],
     createdAt: new Date(Date.now() - 3600000 * 5).toISOString(), // 5시간 전
     commentsCount: 2
   },
@@ -50,9 +50,9 @@ const DEFAULT_QUESTIONS = [
     userId: "user_01", // 테스트 유저의 질문
     userName: "김민재 (테스트 학생)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=user_01",
-    title: "통합과학 광합성 과정에서 명반응과 암반응의 차이가 뭔가요?",
-    content: "교과서에서 빛이 필요한 반응이 명반응이고, 빛이 직접 필요 없는 반응이 암반응이라고 배웠는데, 두 반응이 일어나는 장소(엽록체 스트로마, 틸라코이드)와 에너지 흐름이 어떻게 유기적으로 연결되는지 자세히 가르쳐주세요.",
-    keywords: ["과학", "생물"],
+    title: "공통수학2 원의 방정식에서 중심과 반지름은 어떻게 찾나요?",
+    content: "x^2 + y^2 - 4x + 6y - 3 = 0 같은 식이 주어졌을 때, 이걸 (x-a)^2 + (y-b)^2 = r^2 꼴로 어떻게 바꾸는지 모르겠어요. 완전제곱식으로 고치는 과정을 단계별로 알려주세요!",
+    keywords: ["공통수학2", "원의방정식"],
     createdAt: new Date(Date.now() - 3600000 * 24).toISOString(), // 24시간 전
     commentsCount: 1
   },
@@ -61,9 +61,9 @@ const DEFAULT_QUESTIONS = [
     userId: "user_02",
     userName: "이지민 (답변 요정)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=user_02",
-    title: "React의 useState를 쓸 때 비동기적 상태 변경 문제가 발생합니다.",
-    content: "setState를 호출한 직후에 state 값을 콘솔에 출력하면 이전 값이 찍히는데, 리액트가 렌더링 최적화를 위해 상태 변경(State Update)을 일괄 처리(Batching)하기 때문인가요? 어떻게 해결해야 하는지 해결책을 알려주세요.",
-    keywords: ["코딩", "React"],
+    title: "미적분 함수의 극한에서 0/0 꼴은 어떻게 계산하나요?",
+    content: "lim(x→2) (x^2-4)/(x-2) 를 계산하면 그냥 대입했을 때 0/0 이 나오는데, 이럴 때 인수분해로 약분한다고 들었어요. 왜 약분이 가능한지, 그리고 답이 왜 4가 되는지 원리가 궁금합니다.",
+    keywords: ["미적분", "극한"],
     createdAt: new Date(Date.now() - 3600000 * 48).toISOString(), // 48시간 전
     commentsCount: 0
   }
@@ -77,7 +77,7 @@ const DEFAULT_ANSWERS = [
     userId: "user_02",
     userName: "이지민 (답변 요정)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=user_02",
-    content: "이차방정식 ax^2 + bx + c = 0 을 a로 묶어서 인수분해식 a(x - 알파)(x - 베타) = 0 과 비교해 보세요! 이 식을 전개하면 ax^2 - a(알파+베타)x + a*알파*베타 = 0 이 되는데, 원래 식의 계수들과 비교(계수비교법)해보면 -a(알파+베타) = b가 되어서 알파+베타 = -b/a 라는 공식이 자연스럽게 유도된답니다! 근의 공식을 직접 더해보는 방법도 있어요.",
+    content: "공통인수는 각 항에 똑같이 들어있는 걸 찾으면 돼요! 6x^2와 9x에서 숫자 6과 9의 최대공약수는 3이고, 문자는 x^2와 x에 공통으로 x가 들어있죠. 그래서 공통인수는 3x! 이걸 묶어내면 3x(2x + 3)이 됩니다. 묶은 뒤 괄호 안을 다시 전개해서 원래 식이 나오는지 확인하면 검산도 돼요.",
     createdAt: new Date(Date.now() - 3600000 * 4).toISOString() // 4시간 전
   },
   {
@@ -86,7 +86,7 @@ const DEFAULT_ANSWERS = [
     userId: "teacher_01",
     userName: "한선생님 (지도 교사)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=teacher_01",
-    content: "지민 학생이 아주 훌륭한 설명을 해주었네요! 추가로 두 근의 합과 곱은 그래프 상의 대칭축(x = -b/2a)을 기준으로 대칭성을 이해할 때도 매우 유용하게 쓰이니 함께 연계해 공부해보세요.",
+    content: "동현 학생, 지민 학생 설명이 정확해요! 한 가지 팁을 더 주자면, 숫자는 '최대공약수', 문자는 '차수가 가장 낮은 것'을 기준으로 묶으면 항상 깔끔하게 인수분해된답니다. 인수분해는 앞으로 배울 모든 단원의 기본기이니 꼭 익혀두세요.",
     createdAt: new Date(Date.now() - 3600000 * 3).toISOString() // 3시간 전
   },
   {
@@ -95,7 +95,7 @@ const DEFAULT_ANSWERS = [
     userId: "user_02",
     userName: "이지민 (답변 요정)",
     userProfile: "https://api.dicebear.com/7.x/adventurer/svg?seed=user_02",
-    content: "엽록체의 틸라코이드 막에서 빛을 받아 ATP와 NADPH라는 화학 에너지를 만드는 단계가 명반응이고, 이 에너지를 사용해 스트로마에서 이산화탄소를 포도당으로 합성하는 단계가 암반응(캘빈 회로)이에요. 즉, 명반응의 결과물이 암반응의 연료 역할을 한답니다!",
+    content: "x^2-4x 부분은 (x-2)^2-4 로, y^2+6y 부분은 (y+3)^2-9 로 바꿔주면 돼요. 그러면 (x-2)^2-4 + (y+3)^2-9 - 3 = 0 이 되고, 상수를 우변으로 넘기면 (x-2)^2 + (y+3)^2 = 16 이 됩니다. 즉 중심은 (2, -3), 반지름은 √16 = 4 예요!",
     createdAt: new Date(Date.now() - 3600000 * 20).toISOString() // 20시간 전
   }
 ];

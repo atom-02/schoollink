@@ -25,7 +25,7 @@ export default function MainFeed({
   const [errorMsg, setErrorMsg] = useState("");
 
   // 과목 태그 선택을 위한 사전 태그 목록
-  const predefinedTags = ["수학", "과학", "영어", "국어", "사회", "코딩", "기타"];
+  const predefinedTags = ["기초수학", "공통수학2", "미적분"];
 
   // 1. 키워드 필터링 및 검색어 필터링 적용
   const filteredQuestions = questions

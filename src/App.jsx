@@ -30,7 +30,7 @@ export default function App() {
   const [myAnswersCount, setMyAnswersCount] = useState(0);
 
   // 과목 키워드 목록 정의
-  const keywords = ["전체", "수학", "과학", "영어", "국어", "사회", "코딩", "기타"];
+  const keywords = ["전체", "기초수학", "공통수학2", "미적분"];
 
   // 최초 로드 시 데이터 초기화 및 상태 로드
   useEffect(() => {
