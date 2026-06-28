@@ -205,7 +205,7 @@ export default function DetailPanel({
               className="input-field"
               style={textareaStyle}
             />
-            <AttachmentInput attachment={answerImage} onChange={setAnswerImage} />
+            <AttachmentInput attachment={answerImage} onChange={setAnswerImage} compact />
             <button type="submit" disabled={submitting} className="btn btn-primary" style={submitBtnStyle}>
               <Send size={14} />
               {submitting ? "등록 중..." : "답변 등록"}
@@ -447,7 +447,10 @@ const answerContentStyle = {
 const footerStyle = {
   padding: "16px 20px",
   borderTop: "1px solid var(--border-color)",
-  backgroundColor: "rgba(0, 0, 0, 0.15)"
+  backgroundColor: "rgba(0, 0, 0, 0.15)",
+  maxHeight: "60vh", // 첨부/키보드로 길어져도 등록 버튼에 스크롤로 닿도록
+  overflowY: "auto",
+  flexShrink: 0
 };
 
 const errorStyle = {

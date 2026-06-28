@@ -8,7 +8,7 @@ import DrawModal from "./DrawModal";
  * @param {Blob|File|null} attachment 현재 첨부 이미지
  * @param {function} onChange (blob|null) => void
  */
-export default function AttachmentInput({ attachment, onChange }) {
+export default function AttachmentInput({ attachment, onChange, compact = false }) {
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const [showDraw, setShowDraw] = useState(false);
@@ -68,10 +68,14 @@ export default function AttachmentInput({ attachment, onChange }) {
         />
       </div>
 
-      {/* 미리보기 */}
+      {/* 미리보기 (compact 모드에선 작은 썸네일 — 좁은 화면에서 등록 버튼이 가려지지 않도록) */}
       {previewUrl && (
         <div style={previewWrapStyle}>
-          <img src={previewUrl} alt="첨부 미리보기" style={previewImgStyle} />
+          <img
+            src={previewUrl}
+            alt="첨부 미리보기"
+            style={compact ? compactPreviewImgStyle : previewImgStyle}
+          />
           <button
             type="button"
             onClick={() => onChange(null)}
@@ -165,6 +169,15 @@ const previewImgStyle = {
   maxWidth: "100%",
   maxHeight: "200px",
   borderRadius: "10px",
+  border: "1px solid var(--border-color)",
+  display: "block"
+};
+
+const compactPreviewImgStyle = {
+  height: "64px",
+  maxWidth: "120px",
+  objectFit: "cover",
+  borderRadius: "8px",
   border: "1px solid var(--border-color)",
   display: "block"
 };
