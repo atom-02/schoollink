@@ -223,7 +223,7 @@ const drawerBackdropStyle = {
   top: 0,
   left: 0,
   width: "100vw",
-  height: "100vh",
+  height: "100dvh", // 모바일 브라우저 툴바를 제외한 실제 보이는 높이 (등록 버튼 가림 방지)
   backgroundColor: "rgba(0, 0, 0, 0.4)",
   display: "flex",
   justifyContent: "flex-end",
@@ -448,7 +448,7 @@ const footerStyle = {
   padding: "16px 20px",
   borderTop: "1px solid var(--border-color)",
   backgroundColor: "rgba(0, 0, 0, 0.15)",
-  maxHeight: "60vh", // 첨부/키보드로 길어져도 등록 버튼에 스크롤로 닿도록
+  maxHeight: "60dvh", // 첨부/키보드로 길어져도 등록 버튼에 스크롤로 닿도록
   overflowY: "auto",
   flexShrink: 0
 };

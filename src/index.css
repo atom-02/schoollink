@@ -45,7 +45,7 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden; /* 전체 페이지 스크롤 방지, 각 단 내부에서 스크롤 */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;

@@ -239,7 +239,7 @@ const loadingContainerStyle = {
   justifyContent: "center",
   alignItems: "center",
   width: "100vw",
-  height: "100vh",
+  height: "100dvh",
   backgroundColor: "var(--bg-primary)",
   color: "var(--text-primary)"
 };
@@ -248,7 +248,7 @@ const appWrapperStyle = {
   display: "flex",
   flexDirection: "column",
   width: "100vw",
-  height: "100vh",
+  height: "100dvh",
   overflow: "hidden",
   backgroundColor: "var(--bg-primary)"
 };
