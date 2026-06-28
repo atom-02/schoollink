@@ -114,14 +114,14 @@ export default function App() {
   const handleCloseDetail = () => setSelectedQuestion(null);
 
   // 신규 질문 등록 (포인트 적립은 DB 트리거가 처리)
-  const handleAddQuestion = async (title, kws, content) => {
-    await addQuestion(currentUser, title, kws, content);
+  const handleAddQuestion = async (title, kws, content, image) => {
+    await addQuestion(currentUser, title, kws, content, image);
     await refresh();
   };
 
   // 신규 답변 등록 (답변수/포인트는 DB 트리거가 처리)
-  const handleAddAnswer = async (questionId, content) => {
-    await addAnswer(currentUser, questionId, content);
+  const handleAddAnswer = async (questionId, content, image) => {
+    await addAnswer(currentUser, questionId, content, image);
     const ans = await getAnswersForQuestion(questionId);
     setCurrentAnswers(ans);
     await refresh();

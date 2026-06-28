@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Search, Send, MessageSquare, Clock, Filter, Sparkles, Plus, AlertCircle } from "lucide-react";
+import AttachmentInput from "./AttachmentInput";
 
 /**
  * 2단: 중앙 질문 게시판 피드 컴포넌트
@@ -22,6 +23,7 @@ export default function MainFeed({
   const [newContent, setNewContent] = useState("");
   const [newTags, setNewTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
+  const [newImage, setNewImage] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
 
   // 과목 태그 선택을 위한 사전 태그 목록
@@ -76,13 +78,14 @@ export default function MainFeed({
     setSubmitting(true);
     try {
       // 부모 컴포넌트의 추가 함수 호출 (Supabase 저장)
-      await onAddQuestion(newTitle, newTags, newContent);
+      await onAddQuestion(newTitle, newTags, newContent, newImage);
 
       // 성공 시 폼 초기화
       setNewTitle("");
       setNewContent("");
       setNewTags([]);
       setTagInput("");
+      setNewImage(null);
       setErrorMsg("");
       setIsFormOpen(false); // 작성 창 닫기
     } catch (err) {
@@ -221,6 +224,12 @@ export default function MainFeed({
               />
             </div>
 
+            {/* 사진 첨부 / 펜 그리기 (수식을 손으로 올릴 때) */}
+            <div style={formGroupStyle}>
+              <label style={labelStyle}>수식 이미지 첨부 (선택) — 사진을 찍거나 펜으로 그려서 올리세요</label>
+              <AttachmentInput attachment={newImage} onChange={setNewImage} />
+            </div>
+
             <div style={formActionStyle}>
               <button
                 type="button"
@@ -289,6 +298,9 @@ export default function MainFeed({
               <div style={cardBodyStyle}>
                 <h4 style={cardTitleStyle}>{q.title}</h4>
                 <p className="line-clamp-2" style={cardContentStyle}>{q.content}</p>
+                {q.imageUrl && (
+                  <img src={q.imageUrl} alt="첨부 이미지" style={cardImageStyle} />
+                )}
               </div>
 
               {/* 카드 하단: 태그 리스트 */}
@@ -558,6 +570,15 @@ const cardContentStyle = {
   fontSize: "13px",
   color: "var(--text-secondary)",
   lineHeight: "1.5"
+};
+
+const cardImageStyle = {
+  marginTop: "10px",
+  maxWidth: "100%",
+  maxHeight: "180px",
+  borderRadius: "8px",
+  border: "1px solid var(--border-color)",
+  objectFit: "cover"
 };
 
 const cardFooterStyle = {

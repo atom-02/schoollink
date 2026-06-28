@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Send, Clock, MessageCircle, ShieldAlert } from "lucide-react";
+import AttachmentInput from "./AttachmentInput";
 
 /**
  * 질문 상세 및 답변(스레드) 서브 슬라이드 패널 컴포넌트
@@ -11,6 +12,7 @@ export default function DetailPanel({
   onAddAnswer
 }) {
   const [answerContent, setAnswerContent] = useState("");
+  const [answerImage, setAnswerImage] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const answerListEndRef = useRef(null);
@@ -34,8 +36,9 @@ export default function DetailPanel({
 
     setSubmitting(true);
     try {
-      await onAddAnswer(selectedQuestion.id, answerContent);
+      await onAddAnswer(selectedQuestion.id, answerContent, answerImage);
       setAnswerContent("");
+      setAnswerImage(null);
       setErrorMsg("");
     } catch (err) {
       console.error(err);
@@ -90,6 +93,12 @@ export default function DetailPanel({
             <h3 style={titleStyle}>{selectedQuestion.title}</h3>
             <p style={contentStyle}>{selectedQuestion.content}</p>
 
+            {selectedQuestion.imageUrl && (
+              <a href={selectedQuestion.imageUrl} target="_blank" rel="noreferrer">
+                <img src={selectedQuestion.imageUrl} alt="첨부 이미지" style={attachImageStyle} />
+              </a>
+            )}
+
             <div style={tagContainerStyle}>
               {selectedQuestion.keywords.map((tag) => (
                 <span key={tag} className="tag-badge">
@@ -127,6 +136,11 @@ export default function DetailPanel({
                       </div>
                     </div>
                     <p style={answerContentStyle}>{ans.content}</p>
+                    {ans.imageUrl && (
+                      <a href={ans.imageUrl} target="_blank" rel="noreferrer">
+                        <img src={ans.imageUrl} alt="첨부 이미지" style={attachImageStyle} />
+                      </a>
+                    )}
                   </div>
                 ))}
                 {/* 스크롤 포커싱 앵커 */}
@@ -147,6 +161,7 @@ export default function DetailPanel({
               className="input-field"
               style={textareaStyle}
             />
+            <AttachmentInput attachment={answerImage} onChange={setAnswerImage} />
             <button type="submit" disabled={submitting} className="btn btn-primary" style={submitBtnStyle}>
               <Send size={14} />
               {submitting ? "등록 중..." : "답변 등록"}
@@ -269,6 +284,16 @@ const contentStyle = {
   lineHeight: "1.6",
   whiteSpace: "pre-wrap", // 줄바꿈과 공백 보존 (Preserve Linebreaks)
   marginBottom: "14px"
+};
+
+const attachImageStyle = {
+  display: "block",
+  maxWidth: "100%",
+  maxHeight: "320px",
+  borderRadius: "10px",
+  border: "1px solid var(--border-color)",
+  margin: "4px 0 14px 0",
+  cursor: "zoom-in"
 };
 
 const tagContainerStyle = {

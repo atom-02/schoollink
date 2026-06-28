@@ -11,6 +11,7 @@ const mapQuestion = (q) => ({
   title: q.title,
   content: q.content,
   keywords: q.keywords || [],
+  imageUrl: q.image_url || null,
   createdAt: q.created_at,
   commentsCount: q.comments_count || 0
 });
@@ -22,8 +23,25 @@ const mapAnswer = (a) => ({
   userName: a.user_name,
   userProfile: a.user_profile,
   content: a.content,
+  imageUrl: a.image_url || null,
   createdAt: a.created_at
 });
+
+/**
+ * 이미지(사진 파일 또는 펜으로 그린 그림)를 Storage에 업로드하고 공개 URL을 반환한다.
+ * @param {string} userId 업로더 ID (파일 경로 구분용)
+ * @param {Blob|File} blob 업로드할 이미지
+ */
+export const uploadAttachment = async (userId, blob) => {
+  const ext = (blob.type && blob.type.split("/")[1]) || "png";
+  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage
+    .from("attachments")
+    .upload(path, blob, { contentType: blob.type || "image/png", upsert: false });
+  if (error) throw error;
+  const { data } = supabase.storage.from("attachments").getPublicUrl(path);
+  return data.publicUrl;
+};
 
 const mapNotice = (n) => ({
   id: n.id,
@@ -70,7 +88,11 @@ export const getQuestions = async () => {
  * 신규 질문을 등록한다. 작성자 정보는 현재 프로필에서 가져온다.
  * 포인트 적립(+10)은 DB 트리거가 자동 처리한다.
  */
-export const addQuestion = async (currentUser, title, keywords, content) => {
+export const addQuestion = async (currentUser, title, keywords, content, imageBlob) => {
+  let imageUrl = null;
+  if (imageBlob) {
+    imageUrl = await uploadAttachment(currentUser.userId, imageBlob);
+  }
   const { data, error } = await supabase
     .from("questions")
     .insert({
@@ -79,7 +101,8 @@ export const addQuestion = async (currentUser, title, keywords, content) => {
       user_profile: currentUser.profileImage,
       title,
       content,
-      keywords
+      keywords,
+      image_url: imageUrl
     })
     .select()
     .single();
@@ -103,7 +126,11 @@ export const getAnswersForQuestion = async (questionId) => {
 /**
  * 답변을 등록한다. 답변수 증가(+1)와 포인트 적립(+20)은 DB 트리거가 자동 처리한다.
  */
-export const addAnswer = async (currentUser, questionId, content) => {
+export const addAnswer = async (currentUser, questionId, content, imageBlob) => {
+  let imageUrl = null;
+  if (imageBlob) {
+    imageUrl = await uploadAttachment(currentUser.userId, imageBlob);
+  }
   const { data, error } = await supabase
     .from("answers")
     .insert({
@@ -111,7 +138,8 @@ export const addAnswer = async (currentUser, questionId, content) => {
       user_id: currentUser.userId,
       user_name: currentUser.name,
       user_profile: currentUser.profileImage,
-      content
+      content,
+      image_url: imageUrl
     })
     .select()
     .single();
