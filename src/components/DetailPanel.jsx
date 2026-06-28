@@ -29,8 +29,9 @@ export default function DetailPanel({
   // 답변 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!answerContent.trim()) {
-      setErrorMsg("답변 내용을 입력해 주세요.");
+    // 글 또는 이미지 중 하나만 있어도 등록 가능 (수식을 사진/펜으로만 올리는 경우 허용)
+    if (!answerContent.trim() && !answerImage) {
+      setErrorMsg("답변 내용을 입력하거나 이미지를 첨부해 주세요.");
       return;
     }
 
@@ -42,7 +43,7 @@ export default function DetailPanel({
       setErrorMsg("");
     } catch (err) {
       console.error(err);
-      setErrorMsg("답변 등록 실패: " + (err?.message || err?.error || JSON.stringify(err)));
+      setErrorMsg("답변 등록에 실패했습니다. " + (err?.message || ""));
     } finally {
       setSubmitting(false);
     }

@@ -66,8 +66,9 @@ export default function MainFeed({
       setErrorMsg("질문 제목을 입력해 주세요.");
       return;
     }
-    if (!newContent.trim()) {
-      setErrorMsg("질문 상세 내용을 입력해 주세요.");
+    // 상세 내용은 글 또는 이미지 중 하나만 있어도 됨 (수식을 사진/펜으로만 올리는 경우 허용)
+    if (!newContent.trim() && !newImage) {
+      setErrorMsg("질문 내용을 입력하거나 이미지를 첨부해 주세요.");
       return;
     }
     if (newTags.length === 0) {
@@ -90,7 +91,7 @@ export default function MainFeed({
       setIsFormOpen(false); // 작성 창 닫기
     } catch (err) {
       console.error(err);
-      setErrorMsg("질문 등록 실패: " + (err?.message || err?.error || JSON.stringify(err)));
+      setErrorMsg("질문 등록에 실패했습니다. " + (err?.message || ""));
     } finally {
       setSubmitting(false);
     }
