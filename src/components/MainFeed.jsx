@@ -9,7 +9,8 @@ export default function MainFeed({
   questions,
   selectedKeyword,
   onSelectQuestion,
-  onAddQuestion
+  onAddQuestion,
+  mobile = false
 }) {
   // 상태 관리 (검색어, 정렬 방식, 신규 질문 폼 필드)
   const [searchQuery, setSearchQuery] = useState("");
@@ -121,7 +122,10 @@ export default function MainFeed({
   };
 
   return (
-    <main className="main-feed-container" style={feedContainerStyle}>
+    <main
+      className="main-feed-container"
+      style={mobile ? { ...feedContainerStyle, padding: "12px 14px" } : feedContainerStyle}
+    >
       {/* 1. 피드 헤더: 검색 및 정렬 */}
       <header style={headerStyle}>
         <div style={titleAreaStyle}>
@@ -131,9 +135,9 @@ export default function MainFeed({
           <span style={countTextStyle}>총 {sortedQuestions.length}개의 질문</span>
         </div>
 
-        <div style={filterActionAreaStyle}>
+        <div style={mobile ? { ...filterActionAreaStyle, width: "100%" } : filterActionAreaStyle}>
           {/* 검색 바 */}
-          <div style={searchBarWrapperStyle}>
+          <div style={mobile ? { ...searchBarWrapperStyle, width: "auto", flex: 1 } : searchBarWrapperStyle}>
             <Search size={16} color="#9ca3af" style={searchIconStyle} />
             <input
               type="text"

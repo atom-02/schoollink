@@ -16,10 +16,15 @@ import {
   getNotices,
   getMyStats
 } from "./lib/api";
-import { GraduationCap, LogOut } from "lucide-react";
+import { useIsMobile } from "./lib/useIsMobile";
+import { GraduationCap, LogOut, Menu, X } from "lucide-react";
 import "./App.css";
 
 export default function App() {
+  // 반응형: 좁은 화면이면 모바일 레이아웃
+  const isMobile = useIsMobile();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   // 인증 상태
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -110,6 +115,7 @@ export default function App() {
   const handleSelectKeyword = (keyword) => {
     setSelectedKeyword(keyword);
     setSelectedQuestion(null);
+    setMenuOpen(false); // 모바일 메뉴에서 선택 시 닫기
   };
 
   const handleSelectQuestion = (question) => setSelectedQuestion(question);
@@ -178,51 +184,89 @@ export default function App() {
       {/* 1. 상단 글로벌 헤더 */}
       <header className="glass-panel" style={appHeaderStyle}>
         <div style={logoAreaStyle}>
+          {isMobile && (
+            <button onClick={() => setMenuOpen(true)} style={menuBtnStyle} title="메뉴">
+              <Menu size={22} />
+            </button>
+          )}
           <GraduationCap size={28} color="#a78bfa" style={{ marginRight: 10 }} />
           <h1 style={logoTextStyle}>스쿨링크 <span>SchoolLink</span></h1>
         </div>
         <div style={headerInfoStyle}>
-          <div style={onlineBadgeStyle}>
-            <span style={dotStyle}></span>
-            <span>자기주도 학습 매칭 활성화 중</span>
-          </div>
+          {!isMobile && (
+            <div style={onlineBadgeStyle}>
+              <span style={dotStyle}></span>
+              <span>자기주도 학습 매칭 활성화 중</span>
+            </div>
+          )}
           <button onClick={handleSignOut} style={logoutBtnStyle} title="로그아웃">
-            <LogOut size={15} style={{ marginRight: 6 }} />
-            로그아웃
+            <LogOut size={15} style={isMobile ? {} : { marginRight: 6 }} />
+            {!isMobile && "로그아웃"}
           </button>
         </div>
       </header>
 
-      {/* 2. 하단 메인 3단 레이아웃 콘텐츠 */}
+      {/* 2. 메인 콘텐츠: 데스크톱은 3단, 모바일은 피드 전체 폭 */}
       <div style={appContentStyle}>
-        <Sidebar
-          currentUser={currentUser}
-          selectedKeyword={selectedKeyword}
-          onSelectKeyword={handleSelectKeyword}
-          keywords={keywords}
-        />
+        {!isMobile && (
+          <Sidebar
+            currentUser={currentUser}
+            selectedKeyword={selectedKeyword}
+            onSelectKeyword={handleSelectKeyword}
+            keywords={keywords}
+          />
+        )}
 
         <MainFeed
           questions={questions}
           selectedKeyword={selectedKeyword}
           onSelectQuestion={handleSelectQuestion}
           onAddQuestion={handleAddQuestion}
+          mobile={isMobile}
         />
 
-        <RightPanel
-          notices={notices}
-          currentUser={currentUser}
-          questionsCount={myQuestionsCount}
-          answersCount={myAnswersCount}
-        />
+        {!isMobile && (
+          <RightPanel
+            notices={notices}
+            currentUser={currentUser}
+            questionsCount={myQuestionsCount}
+            answersCount={myAnswersCount}
+          />
+        )}
       </div>
 
-      {/* [상세보기 스레드] 우측 슬라이드 패널 */}
+      {/* 모바일 메뉴 서랍: 프로필/과목 + 공지/대시보드 */}
+      {isMobile && menuOpen && (
+        <div style={menuBackdropStyle} onClick={() => setMenuOpen(false)}>
+          <div style={menuDrawerStyle} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setMenuOpen(false)} style={menuCloseStyle} title="닫기">
+              <X size={20} />
+            </button>
+            <Sidebar
+              currentUser={currentUser}
+              selectedKeyword={selectedKeyword}
+              onSelectKeyword={handleSelectKeyword}
+              keywords={keywords}
+              mobile
+            />
+            <RightPanel
+              notices={notices}
+              currentUser={currentUser}
+              questionsCount={myQuestionsCount}
+              answersCount={myAnswersCount}
+              mobile
+            />
+          </div>
+        </div>
+      )}
+
+      {/* [상세보기 스레드] 슬라이드 패널 (토글형) */}
       {selectedQuestion && (
         <DetailPanel
           selectedQuestion={selectedQuestion}
           answers={currentAnswers}
           currentUser={currentUser}
+          mobile={isMobile}
           onClose={handleCloseDetail}
           onAddAnswer={handleAddAnswer}
           onDeleteQuestion={handleDeleteQuestion}
@@ -325,4 +369,57 @@ const appContentStyle = {
   width: "100%",
   height: "calc(100% - 64px)",
   overflow: "hidden"
+};
+
+// --- 모바일 전용 스타일 ---
+const menuBtnStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "transparent",
+  border: "none",
+  color: "var(--text-primary)",
+  cursor: "pointer",
+  padding: "4px",
+  marginRight: "8px"
+};
+
+const menuBackdropStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100dvh",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "flex-start",
+  zIndex: 150
+};
+
+const menuDrawerStyle = {
+  position: "relative",
+  width: "84vw",
+  maxWidth: "340px",
+  height: "100%",
+  backgroundColor: "var(--bg-secondary)",
+  borderRight: "1px solid var(--border-color)",
+  boxShadow: "var(--shadow-lg)",
+  display: "flex",
+  flexDirection: "column",
+  overflowY: "auto",
+  animation: "slideInLeft 0.25s ease-out forwards"
+};
+
+const menuCloseStyle = {
+  position: "absolute",
+  top: "12px",
+  right: "12px",
+  zIndex: 2,
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid var(--border-color)",
+  color: "var(--text-secondary)",
+  cursor: "pointer",
+  borderRadius: "8px",
+  padding: "5px",
+  display: "flex"
 };

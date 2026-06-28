@@ -9,6 +9,7 @@ export default function DetailPanel({
   selectedQuestion,
   answers,
   currentUser,
+  mobile = false,
   onClose,
   onAddAnswer,
   onDeleteQuestion,
@@ -86,7 +87,7 @@ export default function DetailPanel({
   return (
     <div style={drawerBackdropStyle} onClick={onClose}>
       <div
-        style={drawerContainerStyle}
+        style={mobile ? { ...drawerContainerStyle, width: "100%", maxWidth: "100%" } : drawerContainerStyle}
         onClick={(e) => e.stopPropagation()} // 이벤트 버블링(부모 클릭 전파) 차단
       >
         {/* 1. 헤더 영역 */}

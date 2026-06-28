@@ -4,7 +4,7 @@ import { Megaphone, Calendar, Award, MessageSquare, HelpCircle, Trophy } from "l
 /**
  * 3단: 우측 정보 패널 컴포넌트
  */
-export default function RightPanel({ notices, currentUser, questionsCount, answersCount }) {
+export default function RightPanel({ notices, currentUser, questionsCount, answersCount, mobile = false }) {
   
   // 오늘의 공부 명언 랜덤 추출 또는 고정 설정
   const studyQuote = {
@@ -29,7 +29,10 @@ export default function RightPanel({ notices, currentUser, questionsCount, answe
   };
 
   return (
-    <aside className="glass-panel right-panel-container" style={rightPanelStyle}>
+    <aside
+      className="glass-panel right-panel-container"
+      style={mobile ? { ...rightPanelStyle, width: "100%", height: "auto", borderLeft: "none", overflowY: "visible" } : rightPanelStyle}
+    >
       {/* 1. 학교 공지사항 섹션 */}
       <div style={sectionStyle}>
         <h4 style={sectionTitleStyle}>

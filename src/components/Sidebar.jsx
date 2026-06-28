@@ -12,10 +12,14 @@ export default function Sidebar({
   currentUser,
   selectedKeyword,
   onSelectKeyword,
-  keywords
+  keywords,
+  mobile = false
 }) {
   return (
-    <aside className="glass-panel sidebar-container" style={sidebarStyle}>
+    <aside
+      className="glass-panel sidebar-container"
+      style={mobile ? { ...sidebarStyle, width: "100%", height: "auto", borderRight: "none" } : sidebarStyle}
+    >
       {/* 1. 상단 사용자 프로필 카드 */}
       <div className="user-profile-card" style={profileCardStyle}>
         <div style={avatarWrapperStyle}>
