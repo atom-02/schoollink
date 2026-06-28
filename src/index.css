@@ -1,0 +1,204 @@
+/* 폰트 및 핵심 테마 색상 정의 */
+:root {
+  /* 다크 테마를 기본으로 하는 프리미엄 색상 팔레트 (HSL 기반) */
+  --bg-primary: #0f1016; /* 전체 배경 (매우 어두운 남색) */
+  --bg-secondary: #161720; /* 좌측/우측 패널 배경 */
+  --bg-tertiary: #1f202e; /* 중앙 카드 및 피드 입력 창 배경 */
+  
+  --glass-bg: rgba(22, 23, 32, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #f3f4f6; /* 메인 텍스트 (밝은 그레이) */
+  --text-secondary: #9ca3af; /* 서브 텍스트 (중간 그레이) */
+  --text-muted: #6b7280; /* 비활성/시간 텍스트 */
+
+  /* 그라데이션 포인트 색상 */
+  --accent-purple: #8b5cf6; /* 보라색 액센트 */
+  --accent-blue: #3b82f6; /* 파란색 액센트 */
+  --accent-pink: #ec4899; /* 핑크색 액센트 (포인트 적립 등) */
+  --accent-gradient: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  --accent-hover-gradient: linear-gradient(135deg, #a78bfa, #60a5fa);
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(139, 92, 246, 0.5);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', var(--font-sans);
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* 기본 리셋 및 글로벌 스타일 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow: hidden; /* 전체 페이지 스크롤 방지, 각 단 내부에서 스크롤 */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 스크롤바 디자인 커스텀 (슬랙/디스코드 스타일) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 모던 타이포그래피 */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* 애니메이션 효과 정의 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-normal) forwards;
+}
+
+/* 공통 클래스 및 레이아웃 */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+/* 버튼 디자인 공통 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: none;
+  color: white;
+}
+
+.btn-primary {
+  background: var(--accent-gradient);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover-gradient);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 입력 필드 공통 */
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+/* 카드 UI */
+.card {
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
+  padding: 16px;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-md);
+}
+
+/* 태그 뱃지 */
+.tag-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 500;
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+/* 말줄임 처리 (Text Clamp) */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
