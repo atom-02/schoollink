@@ -12,6 +12,7 @@ export default function DetailPanel({
 }) {
   const [answerContent, setAnswerContent] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const answerListEndRef = useRef(null);
 
   // 새 답변이 추가되었을 때 하단으로 자동 스크롤
@@ -24,16 +25,24 @@ export default function DetailPanel({
   if (!selectedQuestion) return null;
 
   // 답변 제출 처리
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!answerContent.trim()) {
       setErrorMsg("답변 내용을 입력해 주세요.");
       return;
     }
 
-    onAddAnswer(selectedQuestion.id, answerContent);
-    setAnswerContent("");
-    setErrorMsg("");
+    setSubmitting(true);
+    try {
+      await onAddAnswer(selectedQuestion.id, answerContent);
+      setAnswerContent("");
+      setErrorMsg("");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("답변 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // 시간 포맷 유틸리티
@@ -138,9 +147,9 @@ export default function DetailPanel({
               className="input-field"
               style={textareaStyle}
             />
-            <button type="submit" className="btn btn-primary" style={submitBtnStyle}>
+            <button type="submit" disabled={submitting} className="btn btn-primary" style={submitBtnStyle}>
               <Send size={14} />
-              답변 등록
+              {submitting ? "등록 중..." : "답변 등록"}
             </button>
           </form>
         </footer>

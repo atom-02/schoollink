@@ -3,113 +3,155 @@ import Sidebar from "./components/Sidebar";
 import MainFeed from "./components/MainFeed";
 import RightPanel from "./components/RightPanel";
 import DetailPanel from "./components/DetailPanel";
+import Login from "./components/Login";
+import { supabase } from "./lib/supabase";
 import {
-  initializeStorage,
-  getCurrentUser,
+  getMyProfile,
   getQuestions,
   addQuestion,
   getAnswersForQuestion,
   addAnswer,
-  getNotices
-} from "./utils/storage";
-import { BookOpen, GraduationCap } from "lucide-react";
+  getNotices,
+  getMyStats
+} from "./lib/api";
+import { GraduationCap, LogOut } from "lucide-react";
 import "./App.css";
 
 export default function App() {
-  // 상태 변수 정의
+  // 인증 상태
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // 앱 데이터 상태
   const [currentUser, setCurrentUser] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [notices, setNotices] = useState([]);
-  
+
   const [selectedKeyword, setSelectedKeyword] = useState("전체");
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentAnswers, setCurrentAnswers] = useState([]);
-  
+
   // 사용자의 작성 통계
   const [myQuestionsCount, setMyQuestionsCount] = useState(0);
   const [myAnswersCount, setMyAnswersCount] = useState(0);
 
-  // 과목 키워드 목록 정의
+  // 과목 키워드 목록
   const keywords = ["전체", "기초수학", "공통수학2", "미적분"];
 
-  // 최초 로드 시 데이터 초기화 및 상태 로드
+  // 1) 세션 추적: 최초 세션 확인 + 로그인/로그아웃 이벤트 구독
   useEffect(() => {
-    // 로컬 스토리지 초기화 및 기본값 설정
-    initializeStorage();
-    loadAppData();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // 활성화된 질문(상세 보기)이 변경될 때마다 답변 목록 갱신
+  // 2) 세션이 생기면 앱 데이터 로드, 로그아웃되면 초기화
   useEffect(() => {
+    if (session?.user) {
+      loadAppData(session.user.id);
+    } else {
+      setCurrentUser(null);
+      setQuestions([]);
+      setNotices([]);
+    }
+  }, [session]);
+
+  // 3) 상세 보기가 바뀌면 해당 질문의 답변 목록 갱신
+  useEffect(() => {
+    let active = true;
     if (selectedQuestion) {
-      const answers = getAnswersForQuestion(selectedQuestion.id);
-      setCurrentAnswers(answers);
+      getAnswersForQuestion(selectedQuestion.id).then((ans) => {
+        if (active) setCurrentAnswers(ans);
+      });
     } else {
       setCurrentAnswers([]);
     }
-  }, [selectedQuestion, questions]);
+    return () => {
+      active = false;
+    };
+  }, [selectedQuestion]);
 
-  // 로컬 스토리지로부터 최신 애플리케이션 상태를 읽어오는 함수
-  const loadAppData = () => {
-    const user = getCurrentUser();
-    const allQuestions = getQuestions();
-    const allNotices = getNotices();
-
-    setCurrentUser(user);
-    setQuestions(allQuestions);
-    setNotices(allNotices);
-
-    // 로그인된 유저(user_01)의 통계 계산
-    if (user) {
-      // 1) 내가 쓴 질문 수 계산
-      const myQCount = allQuestions.filter(q => q.userId === user.userId).length;
-      setMyQuestionsCount(myQCount);
-
-      // 2) 내가 쓴 답변 수 계산
-      const allAnswersRaw = localStorage.getItem("schoollink_answers");
-      if (allAnswersRaw) {
-        const allAnswers = JSON.parse(allAnswersRaw);
-        const myACount = allAnswers.filter(a => a.userId === user.userId).length;
-        setMyAnswersCount(myACount);
-      }
+  // Supabase로부터 최신 상태를 읽어오는 함수
+  const loadAppData = async (userId) => {
+    try {
+      const [profile, allQuestions, allNotices, stats] = await Promise.all([
+        getMyProfile(userId),
+        getQuestions(),
+        getNotices(),
+        getMyStats(userId)
+      ]);
+      setCurrentUser(profile);
+      setQuestions(allQuestions);
+      setNotices(allNotices);
+      setMyQuestionsCount(stats.questionsCount);
+      setMyAnswersCount(stats.answersCount);
+    } catch (e) {
+      console.error("[스쿨링크] 데이터 로드 실패:", e);
     }
   };
 
-  // 키워드 필터 선택 핸들러
+  const refresh = async () => {
+    if (session?.user) await loadAppData(session.user.id);
+  };
+
+  // 키워드 필터 선택
   const handleSelectKeyword = (keyword) => {
     setSelectedKeyword(keyword);
-    // 키워드가 바뀌면 혹시 열려있던 상세 스레드는 닫아줌
     setSelectedQuestion(null);
   };
 
-  // 질문 카드 클릭 핸들러 (상세 보기 오픈)
-  const handleSelectQuestion = (question) => {
-    setSelectedQuestion(question);
+  const handleSelectQuestion = (question) => setSelectedQuestion(question);
+  const handleCloseDetail = () => setSelectedQuestion(null);
+
+  // 신규 질문 등록 (포인트 적립은 DB 트리거가 처리)
+  const handleAddQuestion = async (title, kws, content) => {
+    await addQuestion(currentUser, title, kws, content);
+    await refresh();
   };
 
-  // 상세 보기 창 닫기 핸들러
-  const handleCloseDetail = () => {
+  // 신규 답변 등록 (답변수/포인트는 DB 트리거가 처리)
+  const handleAddAnswer = async (questionId, content) => {
+    await addAnswer(currentUser, questionId, content);
+    const ans = await getAnswersForQuestion(questionId);
+    setCurrentAnswers(ans);
+    await refresh();
+  };
+
+  // 로그아웃
+  const handleSignOut = async () => {
     setSelectedQuestion(null);
+    await supabase.auth.signOut();
   };
 
-  // 신규 질문 등록 핸들러
-  const handleAddQuestion = (title, keywords, content) => {
-    addQuestion(title, keywords, content);
-    // 상태 리로드 (목록 갱신 및 포인트 적립 반영)
-    loadAppData();
-  };
-
-  // 신규 답변 등록 핸들러
-  const handleAddAnswer = (questionId, content) => {
-    addAnswer(questionId, content);
-    // 상태 리로드 (댓글 목록 갱신 및 포인트 적립 반영)
-    loadAppData();
-  };
-
-  if (!currentUser) {
+  // --- 렌더 게이트 ---
+  if (authLoading) {
     return (
       <div style={loadingContainerStyle}>
         <p>스쿨링크 정보를 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+
+  // 로그인 안 됨 → 로그인 화면
+  if (!session) {
+    return <Login />;
+  }
+
+  // 로그인은 됐지만 프로필 로딩 전
+  if (!currentUser) {
+    return (
+      <div style={loadingContainerStyle}>
+        <p>프로필 정보를 불러오는 중입니다...</p>
       </div>
     );
   }
@@ -127,12 +169,15 @@ export default function App() {
             <span style={dotStyle}></span>
             <span>자기주도 학습 매칭 활성화 중</span>
           </div>
+          <button onClick={handleSignOut} style={logoutBtnStyle} title="로그아웃">
+            <LogOut size={15} style={{ marginRight: 6 }} />
+            로그아웃
+          </button>
         </div>
       </header>
 
       {/* 2. 하단 메인 3단 레이아웃 콘텐츠 */}
       <div style={appContentStyle}>
-        {/* [1단] 좌측 패널: 프로필 및 과목 키워드 */}
         <Sidebar
           currentUser={currentUser}
           selectedKeyword={selectedKeyword}
@@ -140,7 +185,6 @@ export default function App() {
           keywords={keywords}
         />
 
-        {/* [2단] 중앙 패널: 질문 카드 피드 및 등록 */}
         <MainFeed
           questions={questions}
           selectedKeyword={selectedKeyword}
@@ -148,7 +192,6 @@ export default function App() {
           onAddQuestion={handleAddQuestion}
         />
 
-        {/* [3단] 우측 패널: 학급 공지 및 개인 대시보드 */}
         <RightPanel
           notices={notices}
           currentUser={currentUser}
@@ -157,7 +200,7 @@ export default function App() {
         />
       </div>
 
-      {/* [상세보기 스레드] 우측 슬라이드 패널 (토글형) */}
+      {/* [상세보기 스레드] 우측 슬라이드 패널 */}
       {selectedQuestion && (
         <DetailPanel
           selectedQuestion={selectedQuestion}
@@ -170,7 +213,7 @@ export default function App() {
   );
 }
 
-// --- 인라인 스타일 정의 (3단 구조의 최상단 정렬) ---
+// --- 인라인 스타일 정의 ---
 const loadingContainerStyle = {
   display: "flex",
   justifyContent: "center",
@@ -216,17 +259,10 @@ const logoTextStyle = {
   gap: "6px"
 };
 
-// 로고 속의 영문 폰트 스타일링
-const logoSubStyle = {
-  fontSize: "12px",
-  fontWeight: "400",
-  color: "var(--text-secondary)",
-  textTransform: "uppercase"
-};
-
 const headerInfoStyle = {
   display: "flex",
-  alignItems: "center"
+  alignItems: "center",
+  gap: "12px"
 };
 
 const onlineBadgeStyle = {
@@ -249,11 +285,24 @@ const dotStyle = {
   boxShadow: "0 0 8px #10b981"
 };
 
+const logoutBtnStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  fontSize: "12px",
+  color: "var(--text-secondary)",
+  backgroundColor: "rgba(255, 255, 255, 0.05)",
+  border: "1px solid var(--border-color)",
+  padding: "6px 12px",
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "all var(--transition-fast)"
+};
+
 const appContentStyle = {
   flex: 1,
   display: "flex",
-  flexDirection: "row", // 3단을 가로로 배치 (Horizontal alignment)
+  flexDirection: "row",
   width: "100%",
-  height: "calc(100% - 64px)", // 헤더 높이를 제외한 영역 점유
+  height: "calc(100% - 64px)",
   overflow: "hidden"
 };

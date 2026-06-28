@@ -54,8 +54,11 @@ export default function MainFeed({
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
+  // 등록 진행 중 여부 (중복 제출 방지)
+  const [submitting, setSubmitting] = useState(false);
+
   // 질문 등록 핸들러
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle.trim()) {
       setErrorMsg("질문 제목을 입력해 주세요.");
@@ -70,16 +73,24 @@ export default function MainFeed({
       return;
     }
 
-    // 부모 컴포넌트의 추가 함수 호출
-    onAddQuestion(newTitle, newTags, newContent);
+    setSubmitting(true);
+    try {
+      // 부모 컴포넌트의 추가 함수 호출 (Supabase 저장)
+      await onAddQuestion(newTitle, newTags, newContent);
 
-    // 폼 초기화
-    setNewTitle("");
-    setNewContent("");
-    setNewTags([]);
-    setTagInput("");
-    setErrorMsg("");
-    setIsFormOpen(false); // 작성 창 닫기
+      // 성공 시 폼 초기화
+      setNewTitle("");
+      setNewContent("");
+      setNewTags([]);
+      setTagInput("");
+      setErrorMsg("");
+      setIsFormOpen(false); // 작성 창 닫기
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("질문 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // 태그 토글 핸들러
@@ -224,11 +235,12 @@ export default function MainFeed({
               </button>
               <button
                 type="submit"
+                disabled={submitting}
                 className="btn btn-primary"
                 style={{ padding: "8px 20px" }}
               >
                 <Send size={14} />
-                등록하기
+                {submitting ? "등록 중..." : "등록하기"}
               </button>
             </div>
           </form>
