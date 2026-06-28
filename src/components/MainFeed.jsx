@@ -90,7 +90,7 @@ export default function MainFeed({
       setIsFormOpen(false); // 작성 창 닫기
     } catch (err) {
       console.error(err);
-      setErrorMsg("질문 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      setErrorMsg("질문 등록 실패: " + (err?.message || err?.error || JSON.stringify(err)));
     } finally {
       setSubmitting(false);
     }

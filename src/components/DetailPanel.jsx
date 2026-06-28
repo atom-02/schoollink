@@ -42,7 +42,7 @@ export default function DetailPanel({
       setErrorMsg("");
     } catch (err) {
       console.error(err);
-      setErrorMsg("답변 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      setErrorMsg("답변 등록 실패: " + (err?.message || err?.error || JSON.stringify(err)));
     } finally {
       setSubmitting(false);
     }
