@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Send, Clock, MessageCircle, ShieldAlert } from "lucide-react";
+import { X, Send, Clock, MessageCircle, ShieldAlert, Trash2 } from "lucide-react";
 import AttachmentInput from "./AttachmentInput";
 
 /**
@@ -8,8 +8,11 @@ import AttachmentInput from "./AttachmentInput";
 export default function DetailPanel({
   selectedQuestion,
   answers,
+  currentUser,
   onClose,
-  onAddAnswer
+  onAddAnswer,
+  onDeleteQuestion,
+  onDeleteAnswer
 }) {
   const [answerContent, setAnswerContent] = useState("");
   const [answerImage, setAnswerImage] = useState(null);
@@ -55,6 +58,31 @@ export default function DetailPanel({
     return `${date.getMonth() + 1}월 ${date.getDate()}일 ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   };
 
+  // 본인 질문 삭제 (답변도 함께 삭제됨)
+  const handleDeleteQuestion = async () => {
+    if (!window.confirm("이 질문을 삭제할까요? 달린 답변도 함께 삭제됩니다.")) return;
+    try {
+      await onDeleteQuestion(selectedQuestion);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("삭제에 실패했습니다. " + (err?.message || ""));
+    }
+  };
+
+  // 본인 답변 삭제
+  const handleDeleteAnswer = async (ans) => {
+    if (!window.confirm("이 답변을 삭제할까요?")) return;
+    try {
+      await onDeleteAnswer(ans);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("삭제에 실패했습니다. " + (err?.message || ""));
+    }
+  };
+
+  // 본인 글 여부
+  const isMyQuestion = currentUser && selectedQuestion.userId === currentUser.userId;
+
   return (
     <div style={drawerBackdropStyle} onClick={onClose}>
       <div
@@ -89,6 +117,12 @@ export default function DetailPanel({
                   {formatTime(selectedQuestion.createdAt)}
                 </span>
               </div>
+              {isMyQuestion && (
+                <button onClick={handleDeleteQuestion} style={deleteBtnStyle} title="질문 삭제">
+                  <Trash2 size={14} style={{ marginRight: 4 }} />
+                  삭제
+                </button>
+              )}
             </div>
 
             <h3 style={titleStyle}>{selectedQuestion.title}</h3>
@@ -135,6 +169,15 @@ export default function DetailPanel({
                         <span style={answerAuthorStyle}>{ans.userName}</span>
                         <span style={answerTimeStyle}>{formatTime(ans.createdAt)}</span>
                       </div>
+                      {currentUser && ans.userId === currentUser.userId && (
+                        <button
+                          onClick={() => handleDeleteAnswer(ans)}
+                          style={answerDeleteBtnStyle}
+                          title="답변 삭제"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                     </div>
                     <p style={answerContentStyle}>{ans.content}</p>
                     {ans.imageUrl && (
@@ -348,6 +391,32 @@ const answerMetaStyle = {
   alignItems: "center",
   gap: "8px",
   marginBottom: "8px"
+};
+
+const deleteBtnStyle = {
+  marginLeft: "auto",
+  display: "inline-flex",
+  alignItems: "center",
+  fontSize: "11px",
+  color: "#f87171",
+  background: "rgba(239, 68, 68, 0.08)",
+  border: "1px solid rgba(239, 68, 68, 0.25)",
+  padding: "5px 10px",
+  borderRadius: "8px",
+  cursor: "pointer"
+};
+
+const answerDeleteBtnStyle = {
+  marginLeft: "auto",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#f87171",
+  background: "transparent",
+  border: "none",
+  padding: "4px",
+  borderRadius: "6px",
+  cursor: "pointer"
 };
 
 const smallAvatarStyle = {

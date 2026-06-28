@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { ImagePlus, PenLine, X } from "lucide-react";
+import { ImagePlus, PenLine, X, Camera } from "lucide-react";
 import DrawModal from "./DrawModal";
 
 /**
@@ -10,6 +10,7 @@ import DrawModal from "./DrawModal";
  */
 export default function AttachmentInput({ attachment, onChange }) {
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const [showDraw, setShowDraw] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -33,6 +34,10 @@ export default function AttachmentInput({ attachment, onChange }) {
   return (
     <div>
       <div style={btnRowStyle}>
+        <button type="button" onClick={() => cameraInputRef.current?.click()} style={attachBtnStyle}>
+          <Camera size={15} style={{ marginRight: 6 }} />
+          카메라 촬영
+        </button>
         <button type="button" onClick={() => fileInputRef.current?.click()} style={attachBtnStyle}>
           <ImagePlus size={15} style={{ marginRight: 6 }} />
           사진 첨부
@@ -41,10 +46,20 @@ export default function AttachmentInput({ attachment, onChange }) {
           <PenLine size={15} style={{ marginRight: 6 }} />
           펜으로 그리기
         </button>
+        {/* 갤러리/파일 선택 */}
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          onChange={handleFilePick}
+          style={{ display: "none" }}
+        />
+        {/* 카메라 직접 촬영 (모바일/태블릿) — 후면 카메라 우선 */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
           onChange={handleFilePick}
           style={{ display: "none" }}
         />

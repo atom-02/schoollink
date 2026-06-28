@@ -148,6 +148,40 @@ export const addAnswer = async (currentUser, questionId, content, imageBlob) => 
 };
 
 /**
+ * 첨부 이미지 URL로부터 Storage 경로를 추출해 best-effort로 삭제한다.
+ */
+const removeImageByUrl = async (imageUrl) => {
+  if (!imageUrl) return;
+  const marker = "/attachments/";
+  const idx = imageUrl.indexOf(marker);
+  if (idx === -1) return;
+  const path = decodeURIComponent(imageUrl.slice(idx + marker.length));
+  try {
+    await supabase.storage.from("attachments").remove([path]);
+  } catch {
+    /* 이미지 삭제 실패는 무시 (행 삭제는 진행) */
+  }
+};
+
+/**
+ * 본인 질문을 삭제한다. (RLS로 본인 글만 삭제 가능, 답변은 cascade 삭제)
+ */
+export const deleteQuestion = async (question) => {
+  await removeImageByUrl(question.imageUrl);
+  const { error } = await supabase.from("questions").delete().eq("id", question.id);
+  if (error) throw error;
+};
+
+/**
+ * 본인 답변을 삭제한다. (답변수/포인트는 DB 트리거가 자동 정리)
+ */
+export const deleteAnswer = async (answer) => {
+  await removeImageByUrl(answer.imageUrl);
+  const { error } = await supabase.from("answers").delete().eq("id", answer.id);
+  if (error) throw error;
+};
+
+/**
  * 공지사항 목록을 최신순으로 가져온다.
  */
 export const getNotices = async () => {

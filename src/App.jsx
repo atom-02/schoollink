@@ -11,6 +11,8 @@ import {
   addQuestion,
   getAnswersForQuestion,
   addAnswer,
+  deleteQuestion,
+  deleteAnswer,
   getNotices,
   getMyStats
 } from "./lib/api";
@@ -127,6 +129,21 @@ export default function App() {
     await refresh();
   };
 
+  // 본인 질문 삭제
+  const handleDeleteQuestion = async (question) => {
+    await deleteQuestion(question);
+    setSelectedQuestion(null); // 상세 닫기
+    await refresh();
+  };
+
+  // 본인 답변 삭제
+  const handleDeleteAnswer = async (answer) => {
+    await deleteAnswer(answer);
+    const ans = await getAnswersForQuestion(answer.questionId);
+    setCurrentAnswers(ans);
+    await refresh();
+  };
+
   // 로그아웃
   const handleSignOut = async () => {
     setSelectedQuestion(null);
@@ -205,8 +222,11 @@ export default function App() {
         <DetailPanel
           selectedQuestion={selectedQuestion}
           answers={currentAnswers}
+          currentUser={currentUser}
           onClose={handleCloseDetail}
           onAddAnswer={handleAddAnswer}
+          onDeleteQuestion={handleDeleteQuestion}
+          onDeleteAnswer={handleDeleteAnswer}
         />
       )}
     </div>
